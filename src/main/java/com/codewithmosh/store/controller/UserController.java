@@ -1,6 +1,7 @@
 package com.codewithmosh.store.controller;
 
 import com.codewithmosh.store.dtos.RegisterUserDto;
+import com.codewithmosh.store.dtos.UpdateUserDto;
 import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.entities.UserDto;
 import com.codewithmosh.store.mapper.UserMapper;
@@ -73,5 +74,18 @@ public class UserController {
     // updating basic account info , not password, as password is security
     // thing, we would need to confirm old and new password for that.
 
+    @PutMapping("/updateUser/{id}")
+    public ResponseEntity<UserDto> updateUser(
+            @PathVariable(name="id") Long id,
+            @RequestBody UpdateUserDto request
+            ){
+        var user = userRepository.findById(id).orElse(null);
+        if(user==null){
+            return ResponseEntity.notFound().build();
+        }
+        userMapper.update(request,user);
+        userRepository.save(user);
+        return ResponseEntity.ok(userMapper.toDto(user));
+    }
 
 }
