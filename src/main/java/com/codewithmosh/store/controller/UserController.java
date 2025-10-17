@@ -1,5 +1,6 @@
 package com.codewithmosh.store.controller;
 
+import com.codewithmosh.store.dtos.ChangePasswordRequest;
 import com.codewithmosh.store.dtos.RegisterUserDto;
 import com.codewithmosh.store.dtos.UpdateUserDto;
 import com.codewithmosh.store.entities.User;
@@ -17,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+@RequestMapping("/user")
 @RestController
 public class UserController {
 
@@ -88,4 +90,37 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toDto(user));
     }
 
+    @DeleteMapping("/deleteUser/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id){
+        var user= userRepository.findById(id).orElse(null);
+        if(user==null){
+            System.out.println("user not found");
+            return ResponseEntity.notFound().build();
+        }
+//            userRepository.deleteById(id);
+            userRepository.delete(user);
+        return ResponseEntity.noContent().build();
+
+    }
+
+    @PostMapping("/{id}/change-password")
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request,
+                                                 @PathVariable Long id ){
+        var user= userRepository.findById(id).orElse(null);
+        if(user==null){
+            System.out.println("user not found");
+            return ResponseEntity.notFound().build();
+        }
+
+        // check that the old password given by user is the actual password
+        if(! user.getPassword().equals(request.getOldPassword())){
+//            return ResponseEntity.badRequest().build();
+            // a better approach would be to use unauthorized , but it is not present in this
+            //so
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        user.setPassword(request.getNewPassword());
+        userRepository.save(user);
+        return ResponseEntity.noContent().build();
+    }
 }
