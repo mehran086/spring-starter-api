@@ -4,9 +4,10 @@ import com.codewithmosh.store.dtos.ChangePasswordRequest;
 import com.codewithmosh.store.dtos.RegisterUserDto;
 import com.codewithmosh.store.dtos.UpdateUserDto;
 import com.codewithmosh.store.entities.User;
-import com.codewithmosh.store.entities.UserDto;
+import com.codewithmosh.store.dtos.UserDto;
 import com.codewithmosh.store.mapper.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -14,9 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RequestMapping("/user")
 @RestController
@@ -58,12 +57,19 @@ public class UserController {
 
     }
     @PostMapping("/createUser")
-    public ResponseEntity<UserDto> addUser(@RequestBody RegisterUserDto request
+    public ResponseEntity<?> addUser(@Valid
+                                               @RequestBody RegisterUserDto request
     , UriComponentsBuilder uriBuilder){
         // we cannot directly use userDto as it doesnot contain password
         // we could include password in userDto and put@Jsonignore there , but it only works for
         // serrialization and deserialization
+//        userRepository
 
+
+        // check if the user with this email id already exists
+        if(userRepository.existsByEmail(request.getEmail()) ){
+            return ResponseEntity.badRequest().body(Map.of("message","email already exists"));
+        }
         var user = userMapper.ToEntity(request);
         System.out.println(user);
         userRepository.save(user);
@@ -77,7 +83,7 @@ public class UserController {
     // thing, we would need to confirm old and new password for that.
 
     @PutMapping("/updateUser/{id}")
-    public ResponseEntity<UserDto> updateUser(
+    public ResponseEntity<UserDto> updateUser(@Valid
             @PathVariable(name="id") Long id,
             @RequestBody UpdateUserDto request
             ){
@@ -123,4 +129,10 @@ public class UserController {
         userRepository.save(user);
         return ResponseEntity.noContent().build();
     }
+
+    // lets create exceptional handler.
+
+    // to display errors as key value pair like "name":"name is required"
+    // Map<String,String>
+
 }

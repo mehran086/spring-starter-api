@@ -1,9 +1,4 @@
-package com.codewithmosh.store.entities;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+package com.codewithmosh.store.dtos;
 
 import java.math.BigDecimal;
 

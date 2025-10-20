@@ -1,4 +1,4 @@
-package com.codewithmosh.store.entities;
+package com.codewithmosh.store.dtos;
 
 public class UserDto {
     private Long id;

@@ -1,15 +1,13 @@
 package com.codewithmosh.store.controller;
 
-import com.codewithmosh.store.entities.Category;
 import com.codewithmosh.store.entities.Product;
-import com.codewithmosh.store.entities.ProductDto;
+import com.codewithmosh.store.dtos.ProductDto;
 import com.codewithmosh.store.mapper.ProductMapper;
 import com.codewithmosh.store.repositories.CategoryRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
