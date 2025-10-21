@@ -12,18 +12,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.*;
 
-@RequestMapping("/user")
+@RequestMapping("/users")
 @RestController
 public class UserController {
 
     private UserRepository userRepository;
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserController(UserRepository userRepository) {
@@ -57,7 +61,7 @@ public class UserController {
 
     }
     @PostMapping("/createUser")
-    public ResponseEntity<?> addUser(@Valid
+    public ResponseEntity<?> registerUser(@Valid
                                                @RequestBody RegisterUserDto request
     , UriComponentsBuilder uriBuilder){
         // we cannot directly use userDto as it doesnot contain password
@@ -72,6 +76,8 @@ public class UserController {
         }
         var user = userMapper.ToEntity(request);
         System.out.println(user);
+        // hash password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
         // we will return a user dto. so we would have to use mapper again
         var userDto = userMapper.toDto(user);
@@ -130,9 +136,22 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // lets create exceptional handler.
 
-    // to display errors as key value pair like "name":"name is required"
-    // Map<String,String>
+//    @PostMapping("/auth/login")
+//    public void loginUser(@RequestBody User request){
+//        var dbuser = userRepository.findByEmail(request.getEmail());
+////        System.out.println(dbuser);
+////        if(!passwordEncoder.encode(request.getPassword()).equals(dbuser.getPassword())){
+//        if(!passwordEncoder.matches(request.getPassword(), dbuser.getPassword())){
+//            System.out.println(passwordEncoder.encode(request.getPassword()));
+//            System.out.println(dbuser.getPassword());
+//            System.out.println(request.getPassword());
+//            System.out.println("Incorrect password");
+//        }
+//        else{
+//            System.out.println("Correct password");
+//        }
+//    }
 
 }
+//$2a$10$f4vwHX9hXmz6Om.KHTMCx.eTB607Y3HofLoPmnImQpRbU9jbqa9pq
