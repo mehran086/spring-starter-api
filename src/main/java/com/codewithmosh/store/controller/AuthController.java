@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,7 +54,12 @@ public class AuthController {
                             request.getPassword()
                     )
             );
-           var token = jwtService.generateToken(request.getEmail());
+
+            // we have to generate token with id , but in request we only have email and password
+         var user=   userRepository.findByEmail(request.getEmail()).orElseThrow(()->
+                 new UsernameNotFoundException("Invalid email or password"));
+//           var token = jwtService.generateToken(request.getEmail());
+           var token = jwtService.generateToken(user);
             //  Authentication successful
             return ResponseEntity.ok(new JwtResponse(token));
 
@@ -88,10 +94,11 @@ public class AuthController {
         //Extracting the current principal.
         System.out.println("in me");
       var authentication=  SecurityContextHolder.getContext().getAuthentication(); // we set it up in jwtAuthentication filter
-         var email =(String) authentication.getPrincipal();  // in our implementation we stored email as authentication object
+//         var email =(String) authentication.getPrincipal();  // in our implementation we stored email as authentication object
+         var userID =(Long) authentication.getPrincipal();  // in our implementation we stored id  as authentication object now instead of email.
 
-        System.out.println("The email is : "+email);
-        var user=  userRepository.findByEmail(email).orElse(null);
+        System.out.println("The email is : "+userID);
+        var user=  userRepository.findById(userID).orElse(null);
       if(user==null){
           return ResponseEntity.notFound().build();
       }
