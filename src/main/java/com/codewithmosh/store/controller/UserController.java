@@ -3,6 +3,7 @@ package com.codewithmosh.store.controller;
 import com.codewithmosh.store.dtos.ChangePasswordRequest;
 import com.codewithmosh.store.dtos.RegisterUserDto;
 import com.codewithmosh.store.dtos.UpdateUserDto;
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.dtos.UserDto;
 import com.codewithmosh.store.mapper.UserMapper;
@@ -78,6 +79,7 @@ public class UserController {
         System.out.println(user);
         // hash password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER);  // setting role as user as of now.
         userRepository.save(user);
         // we will return a user dto. so we would have to use mapper again
         var userDto = userMapper.toDto(user);

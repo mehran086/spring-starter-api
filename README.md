@@ -1,19 +1,24 @@
-# The Ultimate Spring Boot Course
+# Adding logout functionality
+Exactly! You’ve got it perfectly. Let me just rephrase it step by step to make it crystal clear:
 
-This repository contains the starter project for Part 2 of my Spring Boot course:
+1. **Incoming request with token** → `isBlacklisted(token)` is called first.
 
-[https://codewithmosh.com/p/spring-boot-building-apis](https://codewithmosh.com/p/spring-boot-building-apis)
+2. **Inside `isBlacklisted`**:
 
-## About this Repository 
+    * If the token **isn’t in the map**, it’s obviously not blacklisted → return `false`.
+    * If the token **is in the map**, check its stored expiration (`expiryEpochSeconds`):
 
-This project is based on the final project from Part 1 of the course, but I’ve cleaned it up and removed unnecessary playground code so we can focus on building APIs in Part 2.
+        * If the current time is **past that expiration**, remove it from the map and return `false` (token isn’t blacklisted anymore, but by this time the JWT itself would likely be expired anyway).
+        * If the current time is **before that expiration**, return `true` → the token is blacklisted, reject the request.
 
-You’ll be cloning this repository and coding along with me as we extend the project.
+3. **JWT validation after that**:
 
-To get started, clone the repository to your local machine:
+    * If `isBlacklisted` returned `false`, you then check whether the JWT itself is expired.
+    * If the JWT is expired → the standard JWT validation fails, request denied.
+    * If the JWT is valid → request proceeds normally.
 
-```sh
-git clone https://github.com/mosh-hamedani/spring-api-starter
+So the blacklist essentially acts as an **early override**: it allows you to immediately invalidate tokens **before their natural JWT expiry**, while still cleaning itself up automatically once the JWT would have expired anyway.
 
-cd spring-api
-```
+---
+
+If you want, I can draw a **small flow diagram** showing exactly how `isBlacklisted` + JWT validation work together — it makes this super intuitive. Do you want me to do that?

@@ -1,10 +1,12 @@
 package com.codewithmosh.store.config;
 
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.filters.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -41,8 +44,17 @@ public class SecurityConfig {
                         c.requestMatchers("/carts/**").permitAll()
                                 .requestMatchers(HttpMethod.POST,"/users/**").permitAll()
                                 .requestMatchers("/auth/**").permitAll()
-                                .anyRequest().permitAll())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                                .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())//.hasRole("ADMIN")
+                                .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(c->
+                        {
+                            c.authenticationEntryPoint
+                                    (new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+                            c.accessDeniedHandler(((request, response, accessDeniedException)
+                                    -> response.setStatus(HttpStatus.FORBIDDEN.value())));
+                        }
+                        );
         return http.build();
     }
     @Bean
